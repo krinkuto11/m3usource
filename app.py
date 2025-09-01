@@ -1,5 +1,6 @@
-from flask import Flask, jsonify
+from flask import Flask, send_file
 import requests
+import io
 
 app = Flask(__name__)
 
@@ -25,10 +26,19 @@ def modify_m3u():
 
     if m3u_content:
         modified_content = modify_m3u_content(m3u_content)
-        return jsonify({'status': 'success', 'modified_m3u': modified_content})
+        
+        # Convertimos el contenido modificado a un objeto de archivo en memoria
+        modified_file = io.StringIO(modified_content)
+        
+        # Devolvemos el archivo modificado como respuesta
+        return send_file(
+            modified_file,
+            mimetype='application/x-mpegURL',  # Tipo MIME adecuado para archivos M3U
+            as_attachment=True,
+            attachment_filename='modified_playlist.m3u'
+        )
     else:
-        return jsonify({'status': 'error', 'message': 'No se pudo descargar el archivo M3U'}), 400
+        return "No se pudo descargar el archivo M3U", 400
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)
-
