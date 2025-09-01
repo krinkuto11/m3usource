@@ -28,8 +28,7 @@ def modify_m3u():
         modified_content = modify_m3u_content(m3u_content)
         
         # Convertimos el contenido modificado a un objeto de archivo en memoria
-        modified_file = io.StringIO(modified_content)
-        
+        modified_file = io.BytesIO(modified_content.encode('utf-8'))        
         # Devolvemos el archivo modificado como respuesta
         return send_file(
             modified_file,
