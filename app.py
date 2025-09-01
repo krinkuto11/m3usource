@@ -35,7 +35,7 @@ def modify_m3u():
             modified_file,
             mimetype='application/x-mpegURL',  # Tipo MIME adecuado para archivos M3U
             as_attachment=True,
-            attachment_filename='modified_playlist.m3u'
+            download_name='modified_playlist.m3u'
         )
     else:
         return "No se pudo descargar el archivo M3U", 400
