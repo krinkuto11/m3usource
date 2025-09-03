@@ -20,7 +20,7 @@ def modify_m3u_content(content):
 @app.route('/modify_m3u', methods=['GET'])
 def modify_m3u():
     # URL del archivo M3U
-    m3u_url = 'http://gluetun:43110/1JKe3VPvFe35bm1aiHdD4p1xcGCkZKhH3Q/data/listas/lista_iptv.m3u'  # Cambia esto por la URL de tu archivo M3U
+    m3u_url = 'http://acestream-scraper:43110/1JKe3VPvFe35bm1aiHdD4p1xcGCkZKhH3Q/data/listas/lista_iptv.m3u'  # Cambia esto por la URL de tu archivo M3U
 
     m3u_content = get_m3u_content(m3u_url)
 
