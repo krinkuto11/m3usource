@@ -14,13 +14,13 @@ def get_m3u_content(url):
 
 # Función para modificar el contenido del M3U
 def modify_m3u_content(content):
-    modified_content = content.replace('http://127.0.0.1:6878/', 'http://127.0.0.1:8080/')
+    modified_content = content.replace('http://127.0.0.1:6878/', 'http://acexy:8080/')
     return modified_content
 
 @app.route('/modify_m3u', methods=['GET'])
 def modify_m3u():
     # URL del archivo M3U
-    m3u_url = 'http://127.0.0.1:43110/1JKe3VPvFe35bm1aiHdD4p1xcGCkZKhH3Q/data/listas/lista_iptv.m3u'  # Cambia esto por la URL de tu archivo M3U
+    m3u_url = 'http://gluetun:43110/1JKe3VPvFe35bm1aiHdD4p1xcGCkZKhH3Q/data/listas/lista_iptv.m3u'  # Cambia esto por la URL de tu archivo M3U
 
     m3u_content = get_m3u_content(m3u_url)
 
