@@ -14,7 +14,7 @@ def get_m3u_content(url):
 
 # Función para modificar el contenido del M3U
 def modify_m3u_content(content):
-    modified_content = content.replace('http://127.0.0.1:6878/', 'http://acexy:8080/')
+    modified_content = content.replace('http://127.0.0.1:6878/', 'http://gluetun:6878/')
     return modified_content
 
 @app.route('/modify_m3u', methods=['GET'])
