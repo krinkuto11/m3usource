@@ -5,8 +5,6 @@ import re
 
 app = Flask(__name__)
 
-DEFAULT_M3U_URL = 'http://192.168.20.3:43110/1JKe3VPvFe35bm1aiHdD4p1xcGCkZKhH3Q/data/listas/lista_iptv.m3u'
-
 # Descarga el archivo M3U desde la URL
 def get_m3u_content(url):
     try:
@@ -31,12 +29,19 @@ def validate_host_port(host, port_str):
     return True, port
 
 # Modifica el contenido del M3U reemplazando 127.0.0.1/localhost:<puerto> por host:port
+# y acestream://<id> por http://host:port/ace/getstream?id=<id>
 def modify_m3u_content(content, host, port):
     # Sustituye sólo el prefijo del URL (mantiene el path que venga después)
     # Coincide con http://127.0.0.1:<puerto>... o http://localhost:<puerto>...
     pattern = re.compile(r'http://(?:127\.0\.0\.1|localhost):\d+(?=/)')
     replacement = f'http://{host}:{port}'
     modified = pattern.sub(replacement, content)
+    
+    # Sustituye acestream://<id> por http://host:port/ace/getstream?id=<id>
+    acestream_pattern = re.compile(r'acestream://([a-fA-F0-9]{40})')
+    acestream_replacement = f'http://{host}:{port}/ace/getstream?id=\\1'
+    modified = acestream_pattern.sub(acestream_replacement, modified)
+    
     return modified
 
 @app.route('/modify_m3u', methods=['GET'])
@@ -44,7 +49,10 @@ def modify_m3u():
     # Lee parámetros de query
     host = request.args.get('host', '').strip()
     port_str = request.args.get('port', '').strip()
-    m3u_url = (request.args.get('m3u_url') or DEFAULT_M3U_URL).strip()
+    m3u_url = request.args.get('m3u_url', '').strip()
+    
+    if not m3u_url:
+        return "Parámetro 'm3u_url' es requerido.", 400
 
     ok, port_or_msg = validate_host_port(host, port_str)
     if not ok:
