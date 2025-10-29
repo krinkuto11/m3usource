@@ -37,8 +37,8 @@ jobs:
     - name: Build and push Docker image
       run: |
         # Construir la imagen de Docker usando GHCR
-        docker build -t ghcr.io/${{ github.repository_owner }}/acestream-to-acexy:latest .
+        docker build -t ghcr.io/${{ github.repository_owner }}/m3usource:latest .
         
         # Empujar la imagen a GHCR
-        docker push ghcr.io/${{ github.repository_owner }}/acestream-to-acexy:latest
+        docker push ghcr.io/${{ github.repository_owner }}/m3usource:latest
 
