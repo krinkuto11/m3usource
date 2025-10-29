@@ -54,7 +54,7 @@ docker build -t m3usource .
 docker run -p 5000:5000 m3usource
 ```
 
-### Docker Hub
+### GitHub Container Registry
 
 ```bash
 docker pull ghcr.io/krinkuto11/m3usource:latest
