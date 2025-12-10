@@ -67,6 +67,24 @@ docker run -p 5000:5000 ghcr.io/krinkuto11/m3usource:latest
 - requests 2.28.1
 - Werkzeug 2.2.2
 
+## Configuración
+
+### Variables de entorno
+
+- `M3U_TIMEOUT` (float): define cuántos segundos espera la aplicación al descargar el archivo M3U. Si no se configura toma el valor por defecto de 15. Una vez que se inicia la app con este valor, se puede seguir ajustando en cada petición usando el parámetro `timeout`.
+
+Ejemplo para cambiarlo en local:
+
+```bash
+M3U_TIMEOUT=30 python app.py
+```
+
+Ejemplo con Docker:
+
+```bash
+docker run -p 5000:5000 -e M3U_TIMEOUT=30 m3usource
+```
+
 ## Notas
 
 - Para producción, usar un servidor WSGI como gunicorn o uwsgi
