@@ -1,6 +1,7 @@
 import io
 import os
 import re
+from urllib.parse import quote
 
 import requests
 from flask import Flask, send_file, request, abort
@@ -39,19 +40,24 @@ def validate_host_port(host, port_str):
 def modify_m3u_content(content, host, port, mode='default'):
     if mode == 'proxy':
         # En modo proxy, reescribir todas las URLs http/https como http://host:port/proxy/<original_url>
-        # Patrón para capturar URLs completas (http o https)
-        url_pattern = re.compile(r'(https?://[^\s\n]+)')
+        # Patrón para capturar URLs completas (http o https), evitando caracteres delimitadores comunes
+        url_pattern = re.compile(r'(https?://[^\s\n\'"<>]+)')
         
         def proxy_replacement(match):
             original_url = match.group(1)
-            return f'http://{host}:{port}/proxy/{original_url}'
+            # URL encode el URL original para asegurar que caracteres especiales sean manejados correctamente
+            encoded_url = quote(original_url, safe='')
+            return f'http://{host}:{port}/proxy/{encoded_url}'
         
         modified = url_pattern.sub(proxy_replacement, content)
         
         # También convertir acestream en modo proxy
         acestream_pattern = re.compile(r'acestream://([a-fA-F0-9]{40})')
-        acestream_replacement = f'http://{host}:{port}/proxy/acestream://\\1'
-        modified = acestream_pattern.sub(acestream_replacement, modified)
+        def acestream_proxy_replacement(match):
+            acestream_url = match.group(0)
+            encoded_url = quote(acestream_url, safe='')
+            return f'http://{host}:{port}/proxy/{encoded_url}'
+        modified = acestream_pattern.sub(acestream_proxy_replacement, modified)
         
         return modified
     else:
