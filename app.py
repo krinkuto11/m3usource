@@ -1,6 +1,7 @@
 import io
 import os
 import re
+from urllib.parse import quote
 
 import requests
 from flask import Flask, send_file, request, abort
@@ -35,19 +36,44 @@ def validate_host_port(host, port_str):
 
 # Modifica el contenido del M3U reemplazando 127.0.0.1/localhost:<puerto> por host:port
 # y acestream://<id> por http://host:port/ace/getstream?id=<id>
-def modify_m3u_content(content, host, port):
-    # Sustituye sólo el prefijo del URL (mantiene el path que venga después)
-    # Coincide con http://127.0.0.1:<puerto>... o http://localhost:<puerto>...
-    pattern = re.compile(r'http://(?:127\.0\.0\.1|localhost):\d+(?=/)')
-    replacement = f'http://{host}:{port}'
-    modified = pattern.sub(replacement, content)
-    
-    # Sustituye acestream://<id> por http://host:port/ace/getstream?id=<id>
-    acestream_pattern = re.compile(r'acestream://([a-fA-F0-9]{40})')
-    acestream_replacement = f'http://{host}:{port}/ace/getstream?id=\\1'
-    modified = acestream_pattern.sub(acestream_replacement, modified)
-    
-    return modified
+# Si mode='proxy', reescribe todas las URLs como http://host:port/proxy/<original_url>
+def modify_m3u_content(content, host, port, mode='default'):
+    if mode == 'proxy':
+        # En modo proxy, reescribir todas las URLs http/https como http://host:port/proxy/<original_url>
+        # Patrón para capturar URLs completas (http o https), evitando caracteres delimitadores comunes
+        url_pattern = re.compile(r'(https?://[^\s\n\'"<>]+)')
+        
+        def proxy_replacement(match):
+            original_url = match.group(1)
+            # URL encode el URL original para asegurar que caracteres especiales sean manejados correctamente
+            encoded_url = quote(original_url, safe='')
+            return f'http://{host}:{port}/proxy/{encoded_url}'
+        
+        modified = url_pattern.sub(proxy_replacement, content)
+        
+        # También convertir acestream en modo proxy
+        acestream_pattern = re.compile(r'acestream://([a-fA-F0-9]{40})')
+        def acestream_proxy_replacement(match):
+            acestream_url = match.group(0)
+            encoded_url = quote(acestream_url, safe='')
+            return f'http://{host}:{port}/proxy/{encoded_url}'
+        modified = acestream_pattern.sub(acestream_proxy_replacement, modified)
+        
+        return modified
+    else:
+        # Modo por defecto: comportamiento original
+        # Sustituye sólo el prefijo del URL (mantiene el path que venga después)
+        # Coincide con http://127.0.0.1:<puerto>... o http://localhost:<puerto>...
+        pattern = re.compile(r'http://(?:127\.0\.0\.1|localhost):\d+(?=/)')
+        replacement = f'http://{host}:{port}'
+        modified = pattern.sub(replacement, content)
+        
+        # Sustituye acestream://<id> por http://host:port/ace/getstream?id=<id>
+        acestream_pattern = re.compile(r'acestream://([a-fA-F0-9]{40})')
+        acestream_replacement = f'http://{host}:{port}/ace/getstream?id=\\1'
+        modified = acestream_pattern.sub(acestream_replacement, modified)
+        
+        return modified
 
 @app.route('/modify_m3u', methods=['GET'])
 def modify_m3u():
@@ -56,9 +82,14 @@ def modify_m3u():
     port_str = request.args.get('port', '').strip()
     m3u_url = request.args.get('m3u_url', '').strip()
     timeout_param = request.args.get('timeout', '').strip()
+    mode = request.args.get('mode', 'default').strip().lower()
 
     if not m3u_url:
         return "Parámetro 'm3u_url' es requerido.", 400
+
+    # Validar modo
+    if mode not in ['default', 'proxy']:
+        return "Parámetro 'mode' debe ser 'default' o 'proxy'.", 400
 
     if timeout_param:
         try:
@@ -79,7 +110,7 @@ def modify_m3u():
     if not m3u_content:
         return "No se pudo descargar el archivo M3U", 400
 
-    modified_content = modify_m3u_content(m3u_content, host, port)
+    modified_content = modify_m3u_content(m3u_content, host, port, mode)
 
     # Devuelve el archivo modificado
     modified_file = io.BytesIO(modified_content.encode('utf-8'))

@@ -4,8 +4,9 @@ Servicio web Flask para modificar archivos de playlist M3U, reemplazando direcci
 
 ## Funcionalidad
 
-- **Reemplazo de localhost**: Convierte `http://127.0.0.1:puerto` y `http://localhost:puerto` por tu `host:port` personalizado
-- **Conversión acestream**: Transforma URLs `acestream://[id]` a formato HTTP `http://host:port/ace/getstream?id=[id]`
+- **Reemplazo de localhost** (modo por defecto): Convierte `http://127.0.0.1:puerto` y `http://localhost:puerto` por tu `host:port` personalizado
+- **Conversión acestream** (modo por defecto): Transforma URLs `acestream://[id]` a formato HTTP `http://host:port/ace/getstream?id=[id]`
+- **Modo proxy**: Reescribe todas las URLs en formato `http://host:port/proxy/<url_original>` para enrutar todo el tráfico a través de un servidor proxy
 
 ## Uso
 
@@ -22,13 +23,27 @@ GET /modify_m3u
 | `m3u_url` | string | Sí | URL del archivo M3U a modificar |
 | `host` | string | Sí | Host de destino (hostname o IP) |
 | `port` | integer | Sí | Puerto de destino (1-65535) |
+| `mode` | string | No | Modo de operación: `default` o `proxy` (por defecto: `default`) |
 
 ### Ejemplo
+
+#### Modo por defecto (reemplazo de localhost y conversión acestream)
 
 ```bash
 curl "http://localhost:5000/modify_m3u?m3u_url=http://ejemplo.com/playlist.m3u&host=192.168.1.100&port=6878" \
   -o modified_playlist.m3u
 ```
+
+#### Modo proxy (todas las URLs a través de proxy)
+
+```bash
+curl "http://localhost:5000/modify_m3u?m3u_url=http://ejemplo.com/playlist.m3u&host=192.168.1.100&port=8080&mode=proxy" \
+  -o modified_playlist.m3u
+```
+
+Este modo reescribe URLs como:
+- Original: `http://provider.com/stream/123.ts`
+- Reescrita: `http://192.168.1.100:8080/proxy/http://provider.com/stream/123.ts`
 
 ## Instalación
 
