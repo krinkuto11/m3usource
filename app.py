@@ -36,10 +36,10 @@ def validate_host_port(host, port_str):
 
 # Modifica el contenido del M3U reemplazando 127.0.0.1/localhost:<puerto> por host:port
 # y acestream://<id> por http://host:port/ace/getstream?id=<id>
-# Si mode='proxy', reescribe todas las URLs como http://host:port/proxy/<original_url>
+# Si mode='proxy', reescribe todas las URLs como http://host:port/proxy?url=<original_url>
 def modify_m3u_content(content, host, port, mode='default'):
     if mode == 'proxy':
-        # En modo proxy, reescribir todas las URLs http/https como http://host:port/proxy/<original_url>
+        # En modo proxy, reescribir todas las URLs http/https como http://host:port/proxy?url=<original_url>
         # Patrón para capturar URLs completas (http o https), evitando caracteres delimitadores comunes
         url_pattern = re.compile(r'(https?://[^\s\n\'"<>]+)')
         
@@ -47,7 +47,7 @@ def modify_m3u_content(content, host, port, mode='default'):
             original_url = match.group(1)
             # URL encode el URL original para asegurar que caracteres especiales sean manejados correctamente
             encoded_url = quote(original_url, safe='')
-            return f'http://{host}:{port}/proxy/{encoded_url}'
+            return f'http://{host}:{port}/proxy?url={encoded_url}'
         
         modified = url_pattern.sub(proxy_replacement, content)
         
@@ -56,7 +56,7 @@ def modify_m3u_content(content, host, port, mode='default'):
         def acestream_proxy_replacement(match):
             acestream_url = match.group(0)
             encoded_url = quote(acestream_url, safe='')
-            return f'http://{host}:{port}/proxy/{encoded_url}'
+            return f'http://{host}:{port}/proxy?url={encoded_url}'
         modified = acestream_pattern.sub(acestream_proxy_replacement, modified)
         
         return modified
