@@ -43,7 +43,7 @@ curl "http://localhost:5000/modify_m3u?m3u_url=http://ejemplo.com/playlist.m3u&h
 
 Este modo reescribe URLs como:
 - Original: `http://provider.com/stream/123.ts`
-- Reescrita: `http://192.168.1.100:8080/proxy/http://provider.com/stream/123.ts`
+- Reescrita: `http://192.168.1.100:8080/proxy?url=http%3A%2F%2Fprovider.com%2Fstream%2F123.ts`
 
 ## Instalación
 
