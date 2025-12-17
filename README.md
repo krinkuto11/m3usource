@@ -6,7 +6,7 @@ Servicio web Flask para modificar archivos de playlist M3U, reemplazando direcci
 
 - **Reemplazo de localhost** (modo por defecto): Convierte `http://127.0.0.1:puerto` y `http://localhost:puerto` por tu `host:port` personalizado
 - **Conversión acestream** (modo por defecto): Transforma URLs `acestream://[id]` a formato HTTP `http://host:port/ace/getstream?id=[id]`
-- **Modo proxy**: Reescribe todas las URLs en formato `http://host:port/proxy/<url_original>` para enrutar todo el tráfico a través de un servidor proxy
+- **Modo proxy**: Reescribe todas las URLs en formato `http://host:port/proxy?url=<url_original>` para enrutar todo el tráfico a través de un servidor proxy
 
 ## Uso
 
